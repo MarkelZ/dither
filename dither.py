@@ -2,35 +2,40 @@ from importlib.resources import path
 import numpy as np
 from PIL import Image
 import sys
-import os
-import json
 
 
-# ======= Mosaics ========
+# ======= Tiles ========
 
-_mosaic_str = [
+INCLUDE_INVERSES = True
+
+tiles_str = [
     '0 0 0; 0 1 0; 0 0 0',
     '1 0 0; 0 0 0; 0 0 1',
     '0 1 0; 1 0 0; 0 0 1',
     '1 0 1; 0 0 0; 1 0 1',
     '1 0 1; 0 1 0; 1 0 1',
-
-    '1 1 1; 1 0 1; 1 1 1',
-    '0 1 1; 1 1 1; 1 1 0',
-    '1 0 1; 0 1 1; 1 1 0',
-    '0 1 0; 1 1 1; 0 1 0',
-    '0 1 0; 1 0 1; 0 1 0',
 ]
 
 
-mosaic_pieces3 = [np.matrix(m) for m in _mosaic_str]
-piece_brightnesses3 = [np.sum(m) / m.size for m in mosaic_pieces3]
+# Create list of tiles from their string representations
+tiles = [np.matrix(m) for m in tiles_str]
+
+# Add also their inverses
+if INCLUDE_INVERSES:
+    tiles += [np.matrix(1 - m) for m in tiles]
+
+# List of the brightness of each tile
+tile_brightnesses = [np.sum(m) / m.size for m in tiles]
+
+# Dimensions of the mosaics (assuming consistency)
+mwidth = tiles[0].shape[0]
+mheight = tiles[0].shape[1]
 
 
-# Given the brightness value of a pixel, returns best matching mosaic piece
+# Given the brightness value of a pixel, returns best matching tile
 def get_matching_piece(brightness):
-    diffs = np.array([abs(p - brightness) for p in piece_brightnesses3])
-    return mosaic_pieces3[np.where(diffs == diffs.min())[0][0]]
+    diffs = np.array([abs(p - brightness) for p in tile_brightnesses])
+    return tiles[np.where(diffs == diffs.min())[0][0]]
 
 
 # ======== Image dithering ========
@@ -58,14 +63,15 @@ def save_img(img, path):
 # Dither an image represented as a matrix of values from 0 to 255
 def dither_img(img):
     w, l = img.shape[0], img.shape[1]
-    nw, nl = w*3, l*3
+    nw, nl = w*mwidth, l*mheight
 
     new_img = np.zeros((nw, nl))
 
     for i in range(w):
         for j in range(l):
             piece = get_matching_piece(img[i, j])
-            new_img[i*3:i*3+3, j*3:j*3+3] = piece
+            new_img[i*mwidth:i*mwidth+mwidth, j *
+                    mheight:j*mheight+mheight] = piece
 
     return new_img
 
