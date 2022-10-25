@@ -3,6 +3,9 @@
 ## Description
 This is a tool for dithering images. 
 
+## Example
+![dithered_image](monadither.png)
+
 ## Dependencies
 - Python 3.
 - PIL, numpy, and sys packages for Python 3.
@@ -24,6 +27,3 @@ python3 dither.py <input_image> <output_image>
 
 ## License
 This code is licensed under the terms of the MIT license.
-
-## Example
-![dithered_image](monadither.png)
