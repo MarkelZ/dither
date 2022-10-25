@@ -4,7 +4,8 @@
 Simple image dithering tool.
 
 ## Dependencies
-- Python packages
+- Python 3.
+- PIL and numpy packages for Python 3.
 
 ## Usage
 ```shell
